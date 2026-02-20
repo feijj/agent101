@@ -87,7 +87,6 @@ agent101/
 │   ├── superpowers-tdd/              ← Test-driven development
 │   ├── superpowers-python-automation/← Python API automation patterns
 │   └── superpowers-rest-automation/  ← REST integration best practices
-└── superpowers/                      ← Mirror copy (for reference/content)
 ```
 
 ## Design Principles
