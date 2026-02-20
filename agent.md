@@ -56,7 +56,7 @@ The step-by-step process from idea to working product:
 - **Finishing** — verifying everything works and shipping
 
 ### 4. Superpowers — Skills That Make Your Agent Better
-The `superpowers/` directory contains **9 reusable skills** that supercharge how your AI agent works. These are structured methodologies the agent follows to produce better results:
+The `.agent/skills/` directory contains **9 reusable skills** that supercharge how your AI agent works. These are structured methodologies the agent follows to produce better results. They show up in the `/` command menu.
 
 | Skill | What It Does |
 |-------|-------------|
@@ -75,18 +75,19 @@ The `superpowers/` directory contains **9 reusable skills** that supercharge how
 ```
 agent101/
 ├── agent.md                          ← You are here
-└── superpowers/                      ← 9 agent skills
-    ├── superpowers-workflow/         ← Master orchestrator + helper scripts
-    │   ├── SKILL.md
-    │   └── scripts/
-    ├── superpowers-brainstorm/       ← Structured brainstorming
-    ├── superpowers-plan/             ← Implementation planning
-    ├── superpowers-debug/            ← Systematic debugging
-    ├── superpowers-review/           ← Code review methodology
-    ├── superpowers-finish/           ← Work finalization
-    ├── superpowers-tdd/              ← Test-driven development
-    ├── superpowers-python-automation/← Python API automation patterns
-    └── superpowers-rest-automation/  ← REST integration best practices
+├── .agent/skills/                    ← 9 agent skills (IDE-discoverable via / menu)
+│   ├── superpowers-workflow/         ← Master orchestrator + helper scripts
+│   │   ├── SKILL.md
+│   │   └── scripts/
+│   ├── superpowers-brainstorm/       ← Structured brainstorming
+│   ├── superpowers-plan/             ← Structured planning
+│   ├── superpowers-debug/            ← Systematic debugging
+│   ├── superpowers-review/           ← Code review methodology
+│   ├── superpowers-finish/           ← Work finalization
+│   ├── superpowers-tdd/              ← Test-driven development
+│   ├── superpowers-python-automation/← Python API automation patterns
+│   └── superpowers-rest-automation/  ← REST integration best practices
+└── superpowers/                      ← Mirror copy (for reference/content)
 ```
 
 ## Design Principles
