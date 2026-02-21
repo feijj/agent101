@@ -1,38 +1,36 @@
 @echo off
-chcp 65001 >nul
-color 0C
-title OpenClaw 之路 · 第二步：安装 OpenClaw
-
+chcp 65001 >nul 2>&1
+cls
 echo ========================================================
 echo.
-echo   OpenClaw 之路 · 第二步：安装 OpenClaw
+echo   OpenClaw - Step 2: Install OpenClaw
 echo.
 echo ========================================================
 echo.
-echo ⚠️  重要安全提示 ⚠️
-echo OpenClaw 拥有读取、修改、删除你电脑文件的权限。
-echo 请不要在装有公司代码或敏感数据的电脑上使用！
-echo 建议在个人电脑或虚拟机中体验。
+echo [WARNING] Security Notice
+echo OpenClaw has permission to read, modify, and delete files on your computer.
+echo Do NOT use this on a machine with company code or sensitive data!
+echo Recommended: use on a personal computer or virtual machine.
 echo.
 echo ========================================================
 echo.
 
-set /p confirm="已了解风险，继续安装？(输入 y 并回车): "
+set /p confirm="Understood the risks, continue? (type y and press Enter): "
 if /i not "%confirm%"=="y" (
-    echo 已取消安装。
+    echo Installation cancelled.
     pause
     exit /b
 )
 
 echo.
-echo 正在安装 OpenClaw...
+echo Installing OpenClaw...
 call npm install -g @openclaw/cli
 echo.
 
 echo ========================================================
-echo   ✅ OpenClaw 安装完成！
+echo   [OK] OpenClaw installed successfully!
 echo.
-echo   接下来你需要运行 openclaw onboard 进行初始化配置。
-echo   请回到教程，按照图文指引完成配置。
+echo   Next: run "openclaw onboard" to configure.
+echo   Follow the tutorial guide for step-by-step instructions.
 echo ========================================================
 pause

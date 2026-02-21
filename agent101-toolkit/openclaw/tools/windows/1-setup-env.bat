@@ -1,31 +1,30 @@
 @echo off
-chcp 65001 >nul
-color 0B
-title OpenClaw 之路 · 第一步：准备运行环境
+chcp 65001 >nul 2>&1
+cls
 echo ========================================================
 echo.
-echo   OpenClaw 之路 · 第一步：准备运行环境
+echo   OpenClaw - Step 1: Setup Environment
 echo.
 echo ========================================================
 echo.
 
 node -v >nul 2>&1
 if %errorlevel% neq 0 (
-    echo ❌ 未检测到 Node.js。
-    echo    请先前往 https://nodejs.org/zh-cn/download/ 下载安装。
-    echo    安装完成后请关闭此窗口并重新运行本脚本。
+    echo [ERROR] Node.js is not installed.
+    echo         Please download from https://nodejs.org/zh-cn/download/
+    echo         After installing, close this window and run this script again.
     pause
     exit /b
 )
-for /f "tokens=*" %%i in ('node -v') do echo ✅ Node.js %%i
+for /f "tokens=*" %%v in ('node -v') do echo [OK] Node.js %%v
 
 echo.
-echo 正在配置国内加速镜像...
+echo Configuring NPM mirror for China...
 call npm config set registry https://registry.npmmirror.com/ >nul 2>&1
-echo    NPM → 淘宝镜像 ✅
+echo [OK] NPM registry set to npmmirror.com
 
 echo.
 echo ========================================================
-echo   ✅ 环境准备完成！请回到教程，继续下一步。
+echo   [OK] Environment ready! Proceed to the next step.
 echo ========================================================
 pause
