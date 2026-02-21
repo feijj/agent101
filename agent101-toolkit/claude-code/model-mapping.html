@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>模型映射参考 — Claude Code × 国产大模型</title>
+    <link rel="stylesheet" href="assets/style.css">
+    <style>
+        .mapping-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            margin: 18px 0;
+            font-size: 0.88rem;
+            border-radius: var(--radius-sm);
+            overflow: hidden;
+            border: 1px solid var(--border);
+        }
+
+        .mapping-table th,
+        .mapping-table td {
+            padding: 12px 16px;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .mapping-table th {
+            background: #22223A;
+            color: var(--primary);
+            font-weight: 600;
+            font-size: 0.82rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .mapping-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .mapping-table tr:hover td {
+            background: rgba(108, 92, 231, 0.05);
+        }
+
+        .mapping-table td:first-child {
+            color: #8888A0;
+            font-family: "SF Mono", "Fira Code", Consolas, monospace;
+            font-size: 0.82rem;
+        }
+
+        .mapping-table td {
+            font-family: "SF Mono", "Fira Code", Consolas, monospace;
+            font-size: 0.82rem;
+        }
+
+        .provider-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 6px;
+        }
+
+        .provider-header .badge {
+            background: var(--primary);
+            color: white;
+            padding: 2px 10px;
+            border-radius: 12px;
+            font-size: 0.72rem;
+            font-weight: 600;
+        }
+
+        .provider-header .badge.multi {
+            background: #00B894;
+        }
+
+        .provider-header .badge.single {
+            background: #6C5CE7;
+        }
+
+        .env-name {
+            color: #A29BFE;
+        }
+
+        .model-name {
+            color: #FD79A8;
+        }
+
+        .note-tag {
+            display: inline-block;
+            background: rgba(253, 121, 168, 0.15);
+            color: #FD79A8;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 0.72rem;
+            font-weight: 600;
+            margin-left: 6px;
+        }
+
+        .strategy-label {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        .strategy-label.uniform {
+            background: rgba(108, 92, 231, 0.2);
+            color: #A29BFE;
+        }
+
+        .strategy-label.tiered {
+            background: rgba(0, 184, 148, 0.2);
+            color: #55EFC4;
+        }
+
+        .doc-link {
+            display: inline-block;
+            color: var(--primary);
+            text-decoration: none;
+            font-size: 0.82rem;
+            margin-top: 8px;
+            transition: color 0.2s;
+        }
+
+        .doc-link:hover {
+            color: #A29BFE;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <header class="header">
+            <h1>🗺️ <span class="gradient">模型映射</span>参考</h1>
+            <p class="subtitle">Claude Code 内部使用多个模型槽位（Sonnet / Opus / Haiku）。<br>接入国产大模型时，需要将这些槽位映射到实际的模型名称。</p>
+        </header>
+
+        <!-- Explanation -->
+        <div class="card">
+            <h2>为什么需要模型映射？</h2>
+            <p class="desc">
+                Claude Code
+                内部按用途区分了多个模型角色：<strong>Opus</strong>（最强推理）、<strong>Sonnet</strong>（日常编码）、<strong>Haiku</strong>（快速响应）等。
+                当你使用国产大模型替代 Anthropic 原生模型时，必须告诉 Claude Code 每个角色应该用哪个实际模型，否则它会去请求不存在的 <code>claude-sonnet-4-xxx</code>
+                然后报错。
+            </p>
+            <div class="info">
+                <strong>💡 映射策略差异</strong>
+                有些厂商只有一个模型（统一映射），有些厂商提供了分层模型（分层映射）。分层映射可以节约 Token 消耗——简单任务交给轻量模型，复杂任务交给旗舰模型。
+            </div>
+        </div>
+
+        <!-- Env var reference -->
+        <div class="card">
+            <h2>环境变量说明</h2>
+            <table class="mapping-table">
+                <thead>
+                    <tr>
+                        <th>环境变量</th>
+                        <th>用途</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="env-name">ANTHROPIC_MODEL</td>
+                        <td>Claude Code 启动时的默认模型</td>
+                    </tr>
+                    <tr>
+                        <td class="env-name">ANTHROPIC_SMALL_FAST_MODEL</td>
+                        <td>轻量级快速任务（代码补全、简单问答）</td>
+                    </tr>
+                    <tr>
+                        <td class="env-name">ANTHROPIC_DEFAULT_SONNET_MODEL</td>
+                        <td>替代 Claude Sonnet — 日常编码主力</td>
+                    </tr>
+                    <tr>
+                        <td class="env-name">ANTHROPIC_DEFAULT_OPUS_MODEL</td>
+                        <td>替代 Claude Opus — 复杂推理任务</td>
+                    </tr>
+                    <tr>
+                        <td class="env-name">ANTHROPIC_DEFAULT_HAIKU_MODEL</td>
+                        <td>替代 Claude Haiku — 快速响应任务</td>
+                    </tr>
+                    <tr>
+                        <td class="env-name">CLAUDE_CODE_SUBAGENT_MODEL</td>
+                        <td>子代理使用的模型（部分厂商需要）</td>
+                    </tr>
+                    <tr>
+                        <td class="env-name">API_TIMEOUT_MS</td>
+                        <td>API 请求超时时间（毫秒）</td>
+                    </tr>
+                    <tr>
+                        <td class="env-name">CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC</td>
+                        <td>禁用非必要网络请求（设为 1）</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- DeepSeek -->
+        <div class="card">
+            <div class="provider-header">
+                <h2>DeepSeek</h2>
+            </div>
+            <span class="strategy-label uniform">统一映射 · 所有槽位 → 同一模型</span>
+            <table class="mapping-table">
+                <thead>
+                    <tr>
+                        <th>Claude Code 槽位</th>
+                        <th>实际模型</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="env-name">ANTHROPIC_MODEL</td>
+                        <td class="model-name">deepseek-chat</td>
+                    </tr>
+                    <tr>
+                        <td class="env-name">ANTHROPIC_SMALL_FAST_MODEL</td>
+                        <td class="model-name">deepseek-chat</td>
+                    </tr>
+                    <tr>
+                        <td class="env-name">ANTHROPIC_DEFAULT_SONNET_MODEL</td>
+                        <td class="model-name">deepseek-chat</td>
+                    </tr>
+                    <tr>
+                        <td class="env-name">ANTHROPIC_DEFAULT_OPUS_MODEL</td>
+                        <td class="model-name">deepseek-chat</td>
+                    </tr>
+                    <tr>
+                        <td class="env-name">ANTHROPIC_DEFAULT_HAIKU_MODEL</td>
+                        <td class="model-name">deepseek-chat</td>
+                    </tr>
+                </tbody>
+            </table>
+            <p class="desc"><code>deepseek-chat</code> 自动指向 DeepSeek 最新旗舰模型（当前为 V3.2）。超时建议 600,000ms。</p>
+            <a href="https://api-docs.deepseek.com/guides/anthropic_api" target="_blank" class="doc-link">📄 官方文档 →</a>
+        </div>
+
+        <!-- Kimi -->
+        <div class="card">
+            <div class="provider-header">
+                <h2>Kimi（月之暗面）</h2>
+            </div>
+            <span class="strategy-label uniform">统一映射 · 所有槽位 → 同一模型</span>
+            <table class="mapping-table">
+                <thead>
+                    <tr>
+                        <th>Claude Code 槽位</th>
+                        <th>实际模型</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="env-name">ANTHROPIC_MODEL</td>
+                        <td class="model-name">kimi-k2-thinking-turbo</td>
+                    </tr>
+                    <tr>
+                        <td class="env-name">ANTHROPIC_SMALL_FAST_MODEL</td>
+                        <td class="model-name">kimi-k2-thinking-turbo</td>
+                    </tr>
+                    <tr>
+                        <td class="env-name">ANTHROPIC_DEFAULT_SONNET_MODEL</td>
+                        <td class="model-name">kimi-k2-thinking-turbo</td>
+                    </tr>
+                    <tr>
+                        <td class="env-name">ANTHROPIC_DEFAULT_OPUS_MODEL</td>
+                        <td class="model-name">kimi-k2-thinking-turbo</td>
+                    </tr>
+                    <tr>
+                        <td class="env-name">ANTHROPIC_DEFAULT_HAIKU_MODEL</td>
+                        <td class="model-name">kimi-k2-thinking-turbo</td>
+                    </tr>
+                    <tr>
+                        <td class="env-name">CLAUDE_CODE_SUBAGENT_MODEL</td>
+                        <td class="model-name">kimi-k2-thinking-turbo<span class="note-tag">Kimi 特有</span></td>
+                    </tr>
+                </tbody>
+            </table>
+            <p class="desc"><code>kimi-k2-thinking-turbo</code> 是快速思考版。如需更强推理，可替换为 <code>kimi-k2-thinking</code>（更慢但更强）。
+            </p>
+            <p class="desc">国内: <code>api.moonshot.cn/anthropic</code> · 海外: <code>api.moonshot.ai/anthropic</code></p>
+            <a href="https://platform.moonshot.cn/docs/guide/agent-support" target="_blank" class="doc-link">📄 官方文档
+                →</a>
+        </div>
+
+        <!-- 智谱 -->
+        <div class="card">
+            <div class="provider-header">
+                <h2>智谱（清华 GLM）</h2>
+            </div>
+            <span class="strategy-label tiered">分层映射 · 不同槽位 → 不同模型</span>
+            <table class="mapping-table">
+                <thead>
+                    <tr>
+                        <th>Claude Code 槽位</th>
+                        <th>实际模型</th>
+                        <th>定位</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="env-name">ANTHROPIC_DEFAULT_OPUS_MODEL</td>
+                        <td class="model-name">glm-5</td>
+                        <td>旗舰 · 最强推理</td>
+                    </tr>
+                    <tr>
+                        <td class="env-name">ANTHROPIC_DEFAULT_SONNET_MODEL</td>
+                        <td class="model-name">glm-4.7</td>
+                        <td>主力 · 日常编码</td>
+                    </tr>
+                    <tr>
+                        <td class="env-name">ANTHROPIC_DEFAULT_HAIKU_MODEL</td>
+                        <td class="model-name">glm-4.5-air</td>
+                        <td>轻量 · 快速响应</td>
+                    </tr>
+                </tbody>
+            </table>
+            <div class="info">
+                <strong>✨ 智谱是唯一提供三层模型映射的厂商</strong>
+                简单任务自动使用便宜的 glm-4.5-air，复杂推理使用旗舰 glm-5，日常编码使用 glm-4.7。这可以显著节约 API 费用。
+            </div>
+            <p class="desc">国内: <code>open.bigmodel.cn/api/anthropic</code> · 海外: <code>api.z.ai/api/anthropic</code>
+            </p>
+            <a href="https://docs.bigmodel.cn/cn/guide/develop/claude" target="_blank" class="doc-link">📄 官方文档 →</a>
+        </div>
+
+        <!-- MiniMax -->
+        <div class="card">
+            <div class="provider-header">
+                <h2>MiniMax（海螺 AI）</h2>
+            </div>
+            <span class="strategy-label uniform">统一映射 · 所有槽位 → 同一模型</span>
+            <table class="mapping-table">
+                <thead>
+                    <tr>
+                        <th>Claude Code 槽位</th>
+                        <th>实际模型</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="env-name">ANTHROPIC_MODEL</td>
+                        <td class="model-name">MiniMax-M2.5</td>
+                    </tr>
+                    <tr>
+                        <td class="env-name">ANTHROPIC_SMALL_FAST_MODEL</td>
+                        <td class="model-name">MiniMax-M2.5</td>
+                    </tr>
+                    <tr>
+                        <td class="env-name">ANTHROPIC_DEFAULT_SONNET_MODEL</td>
+                        <td class="model-name">MiniMax-M2.5</td>
+                    </tr>
+                    <tr>
+                        <td class="env-name">ANTHROPIC_DEFAULT_OPUS_MODEL</td>
+                        <td class="model-name">MiniMax-M2.5</td>
+                    </tr>
+                    <tr>
+                        <td class="env-name">ANTHROPIC_DEFAULT_HAIKU_MODEL</td>
+                        <td class="model-name">MiniMax-M2.5</td>
+                    </tr>
+                </tbody>
+            </table>
+            <p class="desc">国内: <code>api.minimaxi.com/anthropic</code> · 海外: <code>api.minimax.io/anthropic</code></p>
+            <a href="https://platform.minimax.io/docs/coding-plan/claude-code" target="_blank" class="doc-link">📄 官方文档
+                →</a>
+        </div>
+
+        <!-- Qwen -->
+        <div class="card">
+            <div class="provider-header">
+                <h2>通义千问 Qwen（阿里云）</h2>
+            </div>
+            <span class="strategy-label tiered">分层映射 · 主力 + 快速 双模型</span>
+            <table class="mapping-table">
+                <thead>
+                    <tr>
+                        <th>Claude Code 槽位</th>
+                        <th>实际模型</th>
+                        <th>定位</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="env-name">ANTHROPIC_MODEL</td>
+                        <td class="model-name">qwen3.5-plus</td>
+                        <td>默认主模型</td>
+                    </tr>
+                    <tr>
+                        <td class="env-name">ANTHROPIC_DEFAULT_SONNET_MODEL</td>
+                        <td class="model-name">qwen3.5-plus</td>
+                        <td>日常编码</td>
+                    </tr>
+                    <tr>
+                        <td class="env-name">ANTHROPIC_DEFAULT_OPUS_MODEL</td>
+                        <td class="model-name">qwen3.5-plus</td>
+                        <td>复杂推理</td>
+                    </tr>
+                    <tr>
+                        <td class="env-name">ANTHROPIC_SMALL_FAST_MODEL</td>
+                        <td class="model-name">qwen3-coder-next</td>
+                        <td>快速编码</td>
+                    </tr>
+                    <tr>
+                        <td class="env-name">ANTHROPIC_DEFAULT_HAIKU_MODEL</td>
+                        <td class="model-name">qwen3-coder-next</td>
+                        <td>快速响应</td>
+                    </tr>
+                </tbody>
+            </table>
+            <div class="info">
+                <strong>💡 Qwen 的双模型策略</strong>
+                主力任务使用 <code>qwen3.5-plus</code>（强推理），快速任务使用 <code>qwen3-coder-next</code>（专为编码优化的高速模型）。也可用
+                <code>qwen3-max</code> 替代 plus 以启用思考模式。
+            </div>
+            <p class="desc">国内: <code>dashscope.aliyuncs.com/apps/anthropic</code> · 海外:
+                <code>dashscope-intl.aliyuncs.com/apps/anthropic</code></p>
+            <a href="https://help.aliyun.com/zh/model-studio/claude-code" target="_blank" class="doc-link">📄 官方文档 →</a>
+        </div>
+
+        <!-- Summary comparison -->
+        <div class="card">
+            <h2>📊 总览对比</h2>
+            <table class="mapping-table">
+                <thead>
+                    <tr>
+                        <th>厂商</th>
+                        <th>Opus (强推理)</th>
+                        <th>Sonnet (主力)</th>
+                        <th>Haiku (快速)</th>
+                        <th>策略</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>DeepSeek</td>
+                        <td class="model-name">deepseek-chat</td>
+                        <td class="model-name">deepseek-chat</td>
+                        <td class="model-name">deepseek-chat</td>
+                        <td>统一</td>
+                    </tr>
+                    <tr>
+                        <td>Kimi</td>
+                        <td class="model-name">kimi-k2-thinking-turbo</td>
+                        <td class="model-name">kimi-k2-thinking-turbo</td>
+                        <td class="model-name">kimi-k2-thinking-turbo</td>
+                        <td>统一</td>
+                    </tr>
+                    <tr>
+                        <td>智谱</td>
+                        <td class="model-name">glm-5</td>
+                        <td class="model-name">glm-4.7</td>
+                        <td class="model-name">glm-4.5-air</td>
+                        <td>三层</td>
+                    </tr>
+                    <tr>
+                        <td>MiniMax</td>
+                        <td class="model-name">MiniMax-M2.5</td>
+                        <td class="model-name">MiniMax-M2.5</td>
+                        <td class="model-name">MiniMax-M2.5</td>
+                        <td>统一</td>
+                    </tr>
+                    <tr>
+                        <td>Qwen</td>
+                        <td class="model-name">qwen3.5-plus</td>
+                        <td class="model-name">qwen3.5-plus</td>
+                        <td class="model-name">qwen3-coder-next</td>
+                        <td>双层</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <footer class="footer">
+            <p><a href="guide.html" style="color:var(--primary)">← 返回 Claude Code 指南</a> · <a href="../index.html"
+                    style="color:var(--primary)">返回首页</a></p>
+            <p style="margin-top:10px;">Agent 101 Toolkit V2 © 2026 · 数据来源于各厂商官方文档</p>
+        </footer>
+    </div>
+</body>
+
+</html>
